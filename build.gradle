@@ -1,0 +1,72 @@
+plugins {
+	id 'java-library'
+	id 'maven-publish'
+}
+
+ext {
+	jdk_version = 8;
+}
+
+group = project.group
+version = project.version
+description = project.description
+
+sourceCompatibility = jdk_version
+targetCompatibility = jdk_version
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+
+dependencies {
+	// implementation 'de.klotzi111.util:BinaryUtil'
+
+	// https://mvnrepository.com/artifact/com.google.code.gson/gson
+	implementation 'com.google.code.gson:gson:2.9.0'
+
+	// Junit 5 for testing
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+
+test {
+	useJUnitPlatform()
+	testLogging {
+		showStandardStreams = true
+	}
+}
+
+tasks.withType(JavaCompile) {
+	// ensure that the encoding is set to UTF-8, no matter what the system default is
+	// this fixes some edge cases with special characters not displaying correctly
+	// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+	// If Javadoc is generated, this must be specified in that task too.
+	options.encoding = "UTF-8"
+	options.release = jdk_version
+}
+
+java {
+	withSourcesJar()
+}
+
+// configure the maven publication
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			from components.java
+		}
+	}
+
+	// select the repositories you want to publish to
+	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+	repositories {
+		// Add repositories to publish to here.
+		// Notice: This block does NOT have the same function as the block in the top level.
+		// The repositories here will be used for publishing your artifact, not for
+		// retrieving dependencies.
+	
+		// uncomment to publish to the local maven
+		mavenLocal()
+	}
+}
