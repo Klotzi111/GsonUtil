@@ -80,7 +80,7 @@ public class GsonUtil {
 		}
 		gb.registerTypeAdapterFactory(new MapJsonObjectTypeAdapterFactory())
 			.registerTypeAdapterFactory(new InlineFieldJsonObjectTypeAdapterFactory());
-		if (ByteArrayAsHexTypeAdapterFactory.canBeUsed()) {
+		if (ByteArrayAsHexTypeAdapterFactory.defaultIsAvailable()) {
 			gb.registerTypeAdapterFactory(new ByteArrayAsHexTypeAdapterFactory());
 		}
 		return gb;

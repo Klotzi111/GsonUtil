@@ -23,7 +23,7 @@ public class ByteArrayAsHexTest {
 
 	@Test
 	public void testByteArrayAsHex() {
-		Assumptions.assumeTrue(ByteArrayAsHexTypeAdapterFactory.canBeUsed(), "ByteArrayAsHexTypeAdapterFactory can not be used. ByteUtil is not present");
+		Assumptions.assumeTrue(ByteArrayAsHexTypeAdapterFactory.defaultIsAvailable(), "ByteArrayAsHexTypeAdapterFactory can not be used. ByteUtil is not present");
 
 		byte[] bytes = generateByteArray(RANDOM, 50);
 		JsonElement jsonElement = GSON.toJsonTree(bytes);
