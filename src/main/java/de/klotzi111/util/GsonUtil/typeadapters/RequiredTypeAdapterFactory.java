@@ -61,7 +61,10 @@ public class RequiredTypeAdapterFactory extends AbstractEnhancedTypeAdapterFacto
 	private <T> boolean isApplicableForType(TypeToken<T> type) {
 		Class<?> rawType = type.getRawType();
 		boolean fieldValuesInlined = MapJsonObject.class.isAssignableFrom(rawType) || InlineFieldJsonObject.class.isAssignableFrom(rawType);
-		return Object.class.isAssignableFrom(rawType) && !fieldValuesInlined;
+		if (!(Object.class.isAssignableFrom(rawType) && !fieldValuesInlined)) {
+			return false;
+		}
+		return !rawType.getName().startsWith("java.");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -70,11 +73,20 @@ public class RequiredTypeAdapterFactory extends AbstractEnhancedTypeAdapterFacto
 		if (!isApplicableForType(type)) {
 			return null;
 		}
-		Map<String, BoundField> boundFields = BoundFieldHelper.getBoundFields(gson, type);
-		List<BoundFieldWithAnnotation<Required>> requiredFields = BoundFieldHelper.getFieldsWithAnnotation(boundFields, false, Required.class);
-		List<BoundField> requiredFieldsOnly = requiredFields.stream().map(field -> field.boundField).collect(Collectors.toList());
-		if (requiredFields.size() == 0) {
-			// if the type has no field with Required annotation we would not do anything special so let the default impl handle this
+
+		Map<String, BoundField> boundFields;
+		List<BoundField> requiredFieldsOnly;
+		try {
+
+			boundFields = BoundFieldHelper.getBoundFields(gson, type);
+			List<BoundFieldWithAnnotation<Required>> requiredFields = BoundFieldHelper.getFieldsWithAnnotation(boundFields, false, Required.class);
+			requiredFieldsOnly = requiredFields.stream().map(field -> field.boundField).collect(Collectors.toList());
+			if (requiredFields.size() == 0) {
+				// if the type has no field with Required annotation we would not do anything special so let the default impl handle this
+				return null;
+			}
+		} catch (Exception e) {
+			// ignore the error just respond that we can not handle that type
 			return null;
 		}
 
