@@ -21,11 +21,11 @@ public class BoundField {
 	public final TypeAdapter<?> serializeTypeAdapter;
 
 	public final String serializationName;
-	public final boolean isFirstFieldName;
+	public final BoundField realField;
 	public final boolean serialized;
 	public final boolean deserialized;
 
-	protected BoundField(Field field, TypeToken<?> fieldType, boolean jsonAdapterPresent, TypeAdapter<?> typeAdapter, TypeAdapter<?> serializeTypeAdapter, String serializationName, boolean isFirstFieldName,
+	protected BoundField(Field field, TypeToken<?> fieldType, boolean jsonAdapterPresent, TypeAdapter<?> typeAdapter, TypeAdapter<?> serializeTypeAdapter, String serializationName, BoundField realField,
 		boolean serialized, boolean deserialized) {
 		this.field = field;
 		this.fieldType = fieldType;
@@ -34,9 +34,13 @@ public class BoundField {
 		this.typeAdapter = typeAdapter;
 		this.serializeTypeAdapter = serializeTypeAdapter;
 		this.serializationName = serializationName;
-		this.isFirstFieldName = isFirstFieldName;
+		this.realField = realField;
 		this.serialized = serialized;
 		this.deserialized = deserialized;
+	}
+
+	public boolean isAlternativeNameField() {
+		return realField != null;
 	}
 
 	public boolean writeField(Object value) throws IOException, IllegalAccessException {

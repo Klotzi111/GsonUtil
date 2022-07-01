@@ -78,7 +78,8 @@ public class GsonUtil {
 				gb.registerTypeAdapterFactory(factory);
 			}
 		}
-		gb.registerTypeAdapterFactory(new MapJsonObjectTypeAdapterFactory())
+		gb.registerTypeAdapterFactory(new RequiredTypeAdapterFactory())
+			.registerTypeAdapterFactory(new MapJsonObjectTypeAdapterFactory())
 			.registerTypeAdapterFactory(new InlineFieldJsonObjectTypeAdapterFactory());
 		if (ByteArrayAsHexTypeAdapterFactory.defaultIsAvailable()) {
 			gb.registerTypeAdapterFactory(new ByteArrayAsHexTypeAdapterFactory());

@@ -20,15 +20,18 @@ public class InlineFieldJsonObjectTypeAdapterFactory extends AbstractEnhancedTyp
 
 	private static class GsonInlineFieldJsonObjectAdapter implements JsonSerializer<InlineFieldJsonObject>, JsonDeserializer<InlineFieldJsonObject> {
 
-		private final Gson gson;
 		private final ObjectConstructor<InlineFieldJsonObject> objectConstructor;
 
-		public GsonInlineFieldJsonObjectAdapter(Gson gson, ObjectConstructor<InlineFieldJsonObject> objectConstructor) {
-			this.gson = gson;
+		private final BoundField inlineFieldDeserialize;
+		private final BoundField inlineFieldSerialize;
+
+		public GsonInlineFieldJsonObjectAdapter(ObjectConstructor<InlineFieldJsonObject> objectConstructor, BoundField inlineFieldDeserialize, BoundField inlineFieldSerialize) {
 			this.objectConstructor = objectConstructor;
+			this.inlineFieldDeserialize = inlineFieldDeserialize;
+			this.inlineFieldSerialize = inlineFieldSerialize;
 		}
 
-		private BoundField getBoundFieldForType(TypeToken<?> type, boolean isSerialization) {
+		private static BoundField getBoundFieldForType(Gson gson, TypeToken<?> type, boolean isSerialization) {
 			Map<String, BoundField> boundFields = BoundFieldHelper.getBoundFields(gson, type);
 			BoundFieldWithAnnotation<InlineField> inlineFieldWithAnnotation = BoundFieldHelper.getSingleFieldWithAnnotation(boundFields, isSerialization, InlineField.class);
 			if (!BoundFieldHelper.checkOnlyValidFields(boundFields, isSerialization, inlineFieldWithAnnotation)) {
@@ -38,20 +41,29 @@ public class InlineFieldJsonObjectTypeAdapterFactory extends AbstractEnhancedTyp
 			return inlineFieldWithAnnotation.boundField;
 		}
 
+		private static void checkInlineField(BoundField inlineField) {
+			// we want to throw the exception if the get an instance of the type to de-/serialize not before when we already check the type
+			if (inlineField == null) {
+				throw new JsonParseException(
+					"An object implementing \"InlineFieldJsonObject\" must have exactly one field annotated with \"@InlineField\" and must not have other fields that would be de-serialized than key and value fields");
+			}
+		}
+
 		@Override
 		public InlineFieldJsonObject deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
 			if (json.isJsonNull()) {
 				return null;
 			}
 
-			BoundField inlineField = getBoundFieldForType(TypeToken.get(typeOfT), false);
+			BoundField inlineField = inlineFieldDeserialize;
+			checkInlineField(inlineField);
 
 			InlineFieldJsonObject returnObject = objectConstructor.construct();
 			try {
 				inlineField.fromJsonTree(json, returnObject);
 				return returnObject;
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new JsonParseException("Could not set field value for fields of type \"" + typeOfT.getTypeName() + "\"");
+				throw new JsonParseException("Could not set field value for fields of type \"" + typeOfT.getTypeName() + "\"", e);
 			}
 		}
 
@@ -61,12 +73,13 @@ public class InlineFieldJsonObjectTypeAdapterFactory extends AbstractEnhancedTyp
 				return JsonNull.INSTANCE;
 			}
 
-			BoundField inlineField = getBoundFieldForType(TypeToken.get(typeOfSrc), true);
+			BoundField inlineField = inlineFieldSerialize;
+			checkInlineField(inlineField);
 
 			try {
 				return inlineField.toJsonTree(src);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new JsonParseException("Could not get field value for fields of type \"" + typeOfSrc.getTypeName() + "\"");
+				throw new JsonParseException("Could not get field value for fields of type \"" + typeOfSrc.getTypeName() + "\"", e);
 			}
 		}
 	}
@@ -83,7 +96,11 @@ public class InlineFieldJsonObjectTypeAdapterFactory extends AbstractEnhancedTyp
 			return null;
 		}
 		ObjectConstructor<T> objectConstructor = GsonUtil.getObjectConstructor(gson, type);
-		GsonInlineFieldJsonObjectAdapter fd = new GsonInlineFieldJsonObjectAdapter(gson, (ObjectConstructor<InlineFieldJsonObject>) objectConstructor);
+
+		BoundField inlineFieldDeserialize = GsonInlineFieldJsonObjectAdapter.getBoundFieldForType(gson, type, false);
+		BoundField inlineFieldSerialize = GsonInlineFieldJsonObjectAdapter.getBoundFieldForType(gson, type, true);
+
+		GsonInlineFieldJsonObjectAdapter fd = new GsonInlineFieldJsonObjectAdapter((ObjectConstructor<InlineFieldJsonObject>) objectConstructor, inlineFieldDeserialize, inlineFieldSerialize);
 		return (JsonDeSerializerBundle<T>) new JsonDeSerializerBundle<InlineFieldJsonObject>(fd, fd, null);
 	}
 

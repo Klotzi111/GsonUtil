@@ -94,7 +94,7 @@ public class MapJsonObjectTypeAdapterFactory extends AbstractEnhancedTypeAdapter
 					collection.add(returnObject);
 				}
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new JsonParseException("Could not set field value for fields of type \"" + parameterType.getTypeName() + "\"");
+				throw new JsonParseException("Could not set field value for fields of type \"" + parameterType.getTypeName() + "\"", e);
 			}
 			return collection;
 		}
@@ -145,7 +145,7 @@ public class MapJsonObjectTypeAdapterFactory extends AbstractEnhancedTypeAdapter
 						// else we do NOT throw an duplicate key exception because original gson does also not throw on duplicate keys when serializing
 					}
 				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new JsonParseException("Could not get field value for fields of type \"" + objectTypeToken.toString() + "\"");
+					throw new JsonParseException("Could not get field value for fields of type \"" + objectTypeToken.toString() + "\"", e);
 				}
 			}
 			return context.serialize(jsonSerMap, complexMapKeySerialization ? MAP_JSON_ELEMENT_TO_JSON_ELEMENT_TYPE_TOKEN.getType() : MAP_STRING_TO_JSON_ELEMENT_TYPE_TOKEN.getType());

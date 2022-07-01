@@ -1,6 +1,7 @@
 package de.klotzi111.util.GsonUtil.reflection;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ public class BoundFieldHelper {
 	}
 
 	public static boolean isBoundFieldApplicable(BoundField field, boolean realFieldsOnly, boolean isSerialization) {
-		if (realFieldsOnly && !field.isFirstFieldName) {
+		if (realFieldsOnly && field.isAlternativeNameField()) {
 			return false;
 		}
 		if (isSerialization) {
@@ -58,8 +59,18 @@ public class BoundFieldHelper {
 	}
 
 	public static <A extends Annotation> BoundFieldWithAnnotation<A> getSingleFieldWithAnnotation(Map<String, BoundField> boundFields, boolean isSerialization, Class<A> annotationClass) {
-		BoundField resultField = null;
-		A resultAnnotation = null;
+		List<BoundFieldWithAnnotation<A>> fields = getFieldsWithAnnotation(boundFields, isSerialization, annotationClass, 2);
+		if (fields.size() != 1) {
+			return null;
+		}
+		return fields.get(0);
+	}
+
+	public static <A extends Annotation> List<BoundFieldWithAnnotation<A>> getFieldsWithAnnotation(Map<String, BoundField> boundFields, boolean isSerialization, Class<A> annotationClass, int maxFields) {
+		List<BoundFieldWithAnnotation<A>> resultFields = new ArrayList<>();
+		if (maxFields <= 0) {
+			return resultFields;
+		}
 		for (BoundField field : boundFields.values()) {
 			if (!isBoundFieldApplicable(field, true, isSerialization)) {
 				continue;
@@ -68,20 +79,17 @@ public class BoundFieldHelper {
 			A annotation = field.field.getAnnotation(annotationClass);
 			boolean isSearchedAnnotation = annotation != null;
 			if (isSearchedAnnotation) {
-				if (resultField != null) {
-					// already found
-					// TODO: throw exception instead
-					return null;
+				resultFields.add(new BoundFieldWithAnnotation<A>(field, annotation));
+				if (resultFields.size() == maxFields) {
+					break;
 				}
-				resultField = field;
-				resultAnnotation = annotation;
 			}
 		}
-		if (resultField == null) {
-			// no field with annotation found
-			return null;
-		}
-		return new BoundFieldWithAnnotation<A>(resultField, resultAnnotation);
+		return resultFields;
+	}
+
+	public static <A extends Annotation> List<BoundFieldWithAnnotation<A>> getFieldsWithAnnotation(Map<String, BoundField> boundFields, boolean isSerialization, Class<A> annotationClass) {
+		return getFieldsWithAnnotation(boundFields, isSerialization, annotationClass, Integer.MAX_VALUE);
 	}
 
 }

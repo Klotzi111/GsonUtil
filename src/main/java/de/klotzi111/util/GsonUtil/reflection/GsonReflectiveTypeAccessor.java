@@ -81,7 +81,7 @@ public class GsonReflectiveTypeAccessor {
 
 	private BoundField createBoundField(
 		final Gson context, final Field field, final String name,
-		final TypeToken<?> fieldType, boolean serialize, boolean deserialize, boolean isFirstFieldName) {
+		final TypeToken<?> fieldType, boolean serialize, boolean deserialize, BoundField realField) {
 		JsonAdapter annotation = field.getAnnotation(JsonAdapter.class);
 		TypeAdapter<?> mapped = null;
 		if (annotation != null) {
@@ -93,7 +93,7 @@ public class GsonReflectiveTypeAccessor {
 		}
 
 		TypeAdapter<?> serializeTypeAdapter = jsonAdapterPresent ? mapped : GsonUtil.createTypeAdapterRuntimeTypeWrapper(gson, mapped, fieldType.getType());
-		return new BoundField(field, fieldType, jsonAdapterPresent, mapped, serializeTypeAdapter, name, isFirstFieldName, serialize, deserialize);
+		return new BoundField(field, fieldType, jsonAdapterPresent, mapped, serializeTypeAdapter, name, realField, serialize, deserialize);
 	}
 
 	public Map<String, BoundField> getBoundFields(TypeToken<?> type, Class<?> raw) {
@@ -115,14 +115,17 @@ public class GsonReflectiveTypeAccessor {
 				Type fieldType = $Gson$Types.resolve(type.getType(), raw, field.getGenericType());
 				List<String> fieldNames = getFieldNames(field);
 				BoundField previous = null;
+				BoundField realField = null;
 				for (int i = 0, size = fieldNames.size(); i < size; ++i) {
 					String name = fieldNames.get(i);
-					boolean isFirstFieldName = i == 0;
 					if (i != 0) {
 						serialize = false; // only serialize the default name
 					}
 					BoundField boundField = createBoundField(gson, field, name,
-						TypeToken.get(fieldType), serialize, deserialize, isFirstFieldName);
+						TypeToken.get(fieldType), serialize, deserialize, realField);
+					if (i == 0) {
+						realField = boundField;
+					}
 					BoundField replaced = result.put(name, boundField);
 					if (previous == null) {
 						previous = replaced;
