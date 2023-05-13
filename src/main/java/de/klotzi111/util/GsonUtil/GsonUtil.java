@@ -24,7 +24,6 @@ public class GsonUtil {
 	private static final Method JsonAdapterAnnotationTypeAdapterFactory_getTypeAdapter;
 	private static final Field Gson_factories;
 	private static final Field Gson_complexMapKeySerialization;
-	private static final Method ReflectiveTypeAdapterFactory_getBoundFields;
 	private static final Constructor<?> TypeAdapterRuntimeTypeWrapper_constructor;
 
 	static {
@@ -44,9 +43,6 @@ public class GsonUtil {
 
 			Gson_complexMapKeySerialization = Gson.class.getDeclaredField("complexMapKeySerialization");
 			Gson_complexMapKeySerialization.setAccessible(true);
-
-			ReflectiveTypeAdapterFactory_getBoundFields = ReflectiveTypeAdapterFactory.class.getDeclaredMethod("getBoundFields", Gson.class, TypeToken.class, Class.class);
-			ReflectiveTypeAdapterFactory_getBoundFields.setAccessible(true);
 
 			Class<?> clazz = Class.forName("com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper");
 			TypeAdapterRuntimeTypeWrapper_constructor = clazz.getDeclaredConstructor(Gson.class, TypeAdapter.class, Type.class);
