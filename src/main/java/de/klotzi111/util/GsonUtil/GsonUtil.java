@@ -52,6 +52,9 @@ public class GsonUtil {
 		}
 	}
 
+	private GsonUtil() {
+	}
+
 	/**
 	 * This is just for convenience in other code to quickly create a Gson instance with all the handy type adapters of this library
 	 *

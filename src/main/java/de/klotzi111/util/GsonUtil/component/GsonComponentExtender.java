@@ -11,6 +11,9 @@ import de.klotzi111.util.GsonUtil.exception.JsonObjectExtensionConflictException
 
 public class GsonComponentExtender {
 
+	private GsonComponentExtender() {
+	}
+
 	private static class ExtendJsonObjectStackObject {
 		public final JsonObject leftObj;
 		public final JsonObject rightObj;

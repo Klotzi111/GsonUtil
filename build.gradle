@@ -4,15 +4,12 @@ plugins {
 }
 
 ext {
-	jdk_version = 8;
+	jdk_version = JavaVersion.VERSION_1_8;
 }
 
 group = project.group
 version = project.version
 description = project.description
-
-sourceCompatibility = jdk_version
-targetCompatibility = jdk_version
 
 repositories {
 	mavenLocal()
@@ -29,8 +26,9 @@ dependencies {
 	// implementation 'commons-codec:commons-codec:1.15'
 
 	// Junit 5 for testing
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.1'
 }
 
 test {
@@ -51,6 +49,9 @@ tasks.withType(JavaCompile) {
 }
 
 java {
+	sourceCompatibility = jdk_version
+	targetCompatibility = jdk_version
+
 	withSourcesJar()
 }
 

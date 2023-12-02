@@ -23,6 +23,9 @@ import de.klotzi111.util.GsonUtil.reflection.BoundFieldHelper;
 
 public class GsonUpdater {
 
+	private GsonUpdater() {
+	}
+
 	public static void updateObjectRaw(Gson gson, Object target, Map<String, BoundField> boundFields, List<BoundField> requiredFields, JsonObject json, boolean failFast) throws Exception {
 		List<BoundField> requiredFieldsLeft = requiredFields == null ? new ArrayList<>() : new ArrayList<>(requiredFields);
 		List<Throwable> exceptions = new ArrayList<>();
