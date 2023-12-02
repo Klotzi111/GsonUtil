@@ -46,7 +46,7 @@ public class GsonUpdaterTest {
 		assertEquals(updateObject, testObject);
 	}
 
-	public class SpecialTestObject {
+	public static class SpecialTestObject {
 
 		@Expose(deserialize = false)
 		public String name;

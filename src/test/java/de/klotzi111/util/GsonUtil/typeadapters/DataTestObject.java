@@ -29,4 +29,9 @@ public class DataTestObject {
 		return data == other.data && Objects.equals(name, other.name);
 	}
 
+	@Override
+	public String toString() {
+		return name + "=" + data;
+	}
+
 }
